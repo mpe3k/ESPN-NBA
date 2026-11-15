@@ -50,14 +50,14 @@ function computeStandings(schedules, lastSeason) {
     keyById[team.id] = key;
   }
 
-  // Games by date. Value: the winner gets (opponent's current wins + 1), the
+  // Games by date. Value: the winner gets the opponent's current wins, the
   // loser 0. ELO: K = 40, expected result from the opponent's rating.
   const gameStats = {};
   for (const g of uniqueGames(teams)) {
     const w = g.winnerId;
     const l = g.loserId;
 
-    const value = winsById[l] + 1;
+    const value = winsById[l];
     valueById[w] += value;
 
     const eloW = eloById[w];

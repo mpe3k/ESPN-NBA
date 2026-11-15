@@ -51,9 +51,9 @@ reverse the direction.
 ### Value
 
 Games are processed chronologically by date. The winner receives the
-**opponent's number of wins at the time of the game + 1**, the loser receives 0.
-The first game of the season therefore always gives its winner 1 point. The stronger
-the opponent a team beats, the more points it earns.
+**opponent's number of wins at the time of the game**, the loser receives 0.
+A win against an opponent that has no wins yet is therefore worth 0 points. The
+stronger the opponent a team beats, the more points it earns.
 
 ### ELO
 
