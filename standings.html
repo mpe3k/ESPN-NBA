@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NBA tabuľka</title>
+  <style>
+    body { font: 14px/1.5 -apple-system, "Segoe UI", system-ui, sans-serif; color: #1f2328; margin: 24px auto; max-width: 1000px; padding: 0 16px; }
+    h1 { font-size: 22px; margin: 0 0 4px; }
+    #info { color: #57606a; margin: 0 0 16px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { padding: 8px 10px; border-bottom: 1px solid #e5e7eb; text-align: left; white-space: nowrap; }
+    th.num, td.num { text-align: right; font-variant-numeric: tabular-nums; }
+    thead th { background: #f7f8fa; position: sticky; top: 0; }
+    tbody tr:hover { background: #f7f8fa; }
+    th button { all: unset; cursor: pointer; font-weight: 600; }
+    th button:hover, th button:focus-visible { color: #3b82d4; }
+    th::after { content: attr(data-arrow); color: #3b82d4; margin-left: 4px; font-size: 10px; }
+    td.win { color: #1a7f37; }
+    td.loss { color: #cf222e; }
+  </style>
+</head>
+<body>
+  <h1>NBA tabuľka</h1>
+  <p id="info"></p>
+  <div id="standings"></div>
+  <script src="schedules.js"></script>
+  <script src="stats.js"></script>
+  <script src="standings.js"></script>
+</body>
+</html>
