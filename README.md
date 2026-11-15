@@ -1,84 +1,84 @@
 # ESPN NBA
 
-Statická NBA tabuľka a detail tímov postavené na dátach z neoficiálneho ESPN API.
-Nepotrebuje server ani build, stačí otvoriť HTML súbor v prehliadači.
+A static NBA standings table and team detail pages built on data from the unofficial ESPN API.
+No server or build step needed, just open the HTML file in a browser.
 
-## Rýchly štart
+## Quick start
 
-1. Otvorte `standings.html` v prehliadači (hlavná tabuľka).
-2. Kliknutím na názov tímu sa otvorí `team.html?team=<SKRATKA>` s jeho zápasmi.
+1. Open `standings.html` in a browser (main table).
+2. Click a team name to open `team.html?team=<ABBREVIATION>` with that team's games.
 
-Dáta sú už v repozitári (`schedules.js`). Aktualizujete ich takto:
+The data is already in the repository (`schedules.js`). To refresh it:
 
 ```bash
 python3 fetch_schedules.py
 ```
 
-Skript používa len štandardnú knižnicu Pythonu 3 (žiadne `pip install`). Stiahne
-rozvrhy všetkých 30 tímov a predikcie pre neodohrané zápasy (asi 1 000 volaní,
-trvá približne 1 – 2 minúty) a prepíše `schedules.js`. Tento súbor sa needituje ručne.
+The script uses only the Python 3 standard library (no `pip install`). It downloads the
+schedules of all 30 teams and the predictions for unplayed games (about 1,000 requests,
+roughly 1-2 minutes) and overwrites `schedules.js`. Do not edit that file by hand.
 
-## Súbory
+## Files
 
-| Súbor | Účel |
+| File | Purpose |
 |---|---|
-| `fetch_schedules.py` | Stiahne rozvrhy a predikcie z ESPN a vygeneruje `schedules.js` |
-| `schedules.js` | Vygenerované dáta (`const nbaSchedules = {...}`) |
-| `stats.js` | Spoločná logika: Value, ELO, bilancia, séria, zoraďovanie |
-| `standings.html`, `standings.js` | Hlavná zoraditeľná tabuľka tímov |
-| `team.html`, `team.js` | Detail tímu: všetky zápasy podľa dátumu v jednej tabuľke |
+| `fetch_schedules.py` | Downloads schedules and predictions from ESPN and generates `schedules.js` |
+| `schedules.js` | Generated data (`const nbaSchedules = {...}`) |
+| `stats.js` | Shared logic: Value, ELO, records, streak, sorting |
+| `standings.html`, `standings.js` | Main sortable team table |
+| `team.html`, `team.js` | Team detail: all games ordered by date in one table |
 
-## Stĺpce hlavnej tabuľky
+## Main table columns
 
-Kliknutím na hlavičku sa tabuľka zoradí (opätovným kliknutím sa zmení smer).
+Click a column header to sort; click again to reverse the direction. The interface
+labels are in Slovak; the English meaning is given below.
 
-| Stĺpec | Význam |
+| Column | Meaning |
 |---|---|
-| V / P | Výhry / prehry |
-| Úspešnosť | Percento výhier |
-| Body / zápas, Obdržané / zápas, Diff | Priemer strelených a inkasovaných bodov a ich rozdiel |
-| Value | Súčet bodov za výhry (viď nižšie) |
-| ELO | Rating tímu (viď nižšie) |
-| Home / Road | Úspešnosť v domácich zápasoch / v zápasoch vonku |
-| Posl. 10 | Bilancia posledných 10 odohraných zápasov (`výhry-prehry`) |
-| Séria | Aktuálna séria výhier (`W3`) alebo prehier (`L2`) |
+| V / P | Wins / losses |
+| Úspešnosť | Win percentage |
+| Body / zápas, Obdržané / zápas, Diff | Average points scored and allowed per game, and their difference |
+| Value | Sum of points for wins (see below) |
+| ELO | Team rating (see below) |
+| Home / Road | Win percentage in home games / away games |
+| Posl. 10 | Record in the last 10 played games (`wins-losses`) |
+| Séria | Current streak of wins (`W3`) or losses (`L2`) |
 
 ### Value
 
-Zápasy sa prechádzajú chronologicky podľa dátumu. Víťaz dostane
-**počet výhier súpera v čase zápasu + 1**, porazený dostane 0. Prvý zápas
-sezóny teda vždy dáva víťazovi 1 bod. Čím silnejšieho súpera tím porazí,
-tým viac bodov získa.
+Games are processed chronologically by date. The winner receives the
+**opponent's number of wins at the time of the game + 1**, the loser receives 0.
+The first game of the season therefore always gives its winner 1 point. The stronger
+the opponent a team beats, the more points it earns.
 
 ### ELO
 
-- Každý tím začína na **1500**, konštanta **K = 40**.
-- Očakávaná šanca na výhru: `1 / (1 + 10^((ELO súpera − vlastné ELO) / 400))`.
-- Víťaz získa `K × (1 − očakávaná šanca)`, porazený o rovnako veľa stratí.
-- Počíta sa po zápasoch v chronologickom poradí, každý zápas raz.
+- Every team starts at **1500**, with **K = 40**.
+- Expected win probability: `1 / (1 + 10^((opponent ELO - own ELO) / 400))`.
+- The winner gains `K * (1 - expected probability)`, the loser loses the same amount.
+- Computed game by game in chronological order, each game counted once.
 
-## Detail tímu
+## Team detail
 
-Jedna tabuľka so všetkými zápasmi zoradenými podľa dátumu:
+One table with all games ordered by date:
 
-- **Odohrané zápasy:** výsledok (W/L), skóre, získané Value v zápase a ELO po zápase
-  s jeho zmenou, napríklad `1520 (+20.0)`.
-- **Neodohrané zápasy:** v stĺpci Skóre je šanca tímu na výhru podľa ESPN Matchup
-  Predictor (BPI), napríklad `74.3 %`. Bunka je podfarbená na zeleno (šanca 50 %
-  a viac) alebo na červeno (pod 50 %). Čím je šanca ďalej od 50 %, tým sýtejší
-  je odtieň.
+- **Played games:** result (W/L), score, Value earned in the game, and ELO after the game
+  with its change, for example `1520 (+20.0)`.
+- **Unplayed games:** the Score column shows the team's win chance according to the ESPN
+  Matchup Predictor (BPI), for example `74.3 %`. The cell is shaded green (chance of 50 %
+  or more) or red (below 50 %). The further the chance is from 50 %, the stronger the shade.
 
-Predikcia je momentka z času posledného spustenia `fetch_schedules.py`. ESPN ju
-priebežne prepočítava, preto treba dáta obnoviť, ak ich chcete mať aktuálne.
+The prediction is a snapshot from the last run of `fetch_schedules.py`. ESPN keeps
+recalculating it, so refresh the data if you want it up to date.
 
-## Zdroj dát
+## Data source
 
-Dáta pochádzajú z neoficiálnych ESPN endpointov, ktoré ESPN nedokumentuje a môžu
-sa kedykoľvek zmeniť:
+The data comes from unofficial ESPN endpoints, which ESPN does not document and may
+change at any time:
 
 - `https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams`
 - `https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/{id}/schedule`
 - `https://site.api.espn.com/apis/site/v2/sports/basketball/nba/summary?event={gameId}`
-  (kľúč `predictor`)
+  (the `predictor` key)
 
-Projekt nie je spojený s ESPN ani NBA a je určený na osobné použitie.
+This project is not affiliated with ESPN or the NBA and is intended for personal use.
