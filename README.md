@@ -24,25 +24,29 @@ roughly 1-2 minutes) and overwrites `schedules.js`. Do not edit that file by han
 |---|---|
 | `fetch_schedules.py` | Downloads schedules and predictions from ESPN and generates `schedules.js` |
 | `schedules.js` | Generated data (`const nbaSchedules = {...}`) |
+| `lastSeason.js` | Final records of the previous season (wins, losses) per team |
 | `stats.js` | Shared logic: Value, ELO, records, streak, sorting |
 | `standings.html`, `standings.js` | Main sortable team table |
 | `team.html`, `team.js` | Team detail: all games ordered by date in one table |
 
 ## Main table columns
 
-Click a column header to sort; click again to reverse the direction. The interface
-labels are in Slovak; the English meaning is given below.
+The table is centered on the page. Click a column header to sort; click again to
+reverse the direction.
 
 | Column | Meaning |
 |---|---|
-| V / P | Wins / losses |
-| Úspešnosť | Win percentage |
-| Body / zápas, Obdržané / zápas, Diff | Average points scored and allowed per game, and their difference |
-| Value | Sum of points for wins (see below) |
+| TEAM | Team name (links to the team detail) |
+| W / L | Wins / losses |
+| PCT | Win percentage |
+| HOME / AWAY | Win percentage in home games / away games, rounded to whole numbers |
+| PPG / OPP PPG / DIFF | Average points scored and allowed per game, and their difference |
+| STRK | Current streak of wins (`W3`) or losses (`L2`) |
+| L10 | Record in the last 10 played games (`wins-losses`) |
+| VALUE | Sum of points for wins (see below) |
 | ELO | Team rating (see below) |
-| Home / Road | Win percentage in home games / away games |
-| Posl. 10 | Record in the last 10 played games (`wins-losses`) |
-| Séria | Current streak of wins (`W3`) or losses (`L2`) |
+| PREDICTION | Projected wins: current wins + unplayed games where the ESPN Matchup Predictor gives the team **more than 50 %** (exactly 50 % does not count) |
+| 2026 | Change in win percentage vs. last season in whole percentage points (this season's PCT minus last season's PCT); last season's records are in `lastSeason.js` |
 
 ### Value
 
@@ -64,7 +68,7 @@ One table with all games ordered by date:
 
 - **Played games:** result (W/L), score, Value earned in the game, and ELO after the game
   with its change, for example `1520 (+20.0)`.
-- **Unplayed games:** the Score column shows the team's win chance according to the ESPN
+- **Unplayed games:** the SCORE column shows the team's win chance according to the ESPN
   Matchup Predictor (BPI), for example `74.3 %`. The cell is shaded green (chance of 50 %
   or more) or red (below 50 %). The further the chance is from 50 %, the stronger the shade.
 

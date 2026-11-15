@@ -1,14 +1,15 @@
 <!DOCTYPE html>
-<html lang="sk">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>NBA tabuľka</title>
+  <title>NBA Standings</title>
   <style>
-    body { font: 14px/1.5 -apple-system, "Segoe UI", system-ui, sans-serif; color: #1f2328; margin: 24px auto; max-width: 1000px; padding: 0 16px; }
-    h1 { font-size: 22px; margin: 0 0 4px; }
-    #info { color: #57606a; margin: 0 0 16px; }
-    table { border-collapse: collapse; width: 100%; }
+    body { font: 14px/1.5 -apple-system, "Segoe UI", system-ui, sans-serif; color: #1f2328; margin: 24px auto; padding: 0 16px; }
+    h1 { font-size: 30px; margin: 0 0 4px; text-align: center; }
+    #info { color: #57606a; margin: 0 0 16px; text-align: center; }
+    #standings { overflow-x: auto; }
+    table { border-collapse: collapse; margin: 0 auto; }
     th, td { padding: 8px 10px; border-bottom: 1px solid #e5e7eb; text-align: left; white-space: nowrap; }
     th.num, td.num { text-align: right; font-variant-numeric: tabular-nums; }
     thead th { background: #f7f8fa; position: sticky; top: 0; }
@@ -21,10 +22,11 @@
   </style>
 </head>
 <body>
-  <h1>NBA tabuľka</h1>
+  <h1>NBA Standings</h1>
   <p id="info"></p>
   <div id="standings"></div>
   <script src="schedules.js"></script>
+  <script src="lastSeason.js"></script>
   <script src="stats.js"></script>
   <script src="standings.js"></script>
 </body>

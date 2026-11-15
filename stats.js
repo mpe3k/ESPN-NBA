@@ -1,4 +1,4 @@
-// Spolocna logika: statistiky timov z nbaSchedules (schedules.js).
+// Shared logic: team statistics computed from nbaSchedules (schedules.js).
 
 const ELO_START = 1500;
 const ELO_K = 40;
@@ -9,7 +9,7 @@ function playedGames(team) {
     .sort((a, b) => a.date.localeCompare(b.date));
 }
 
-// Kazdy zapas je v rozvrhu oboch timov - vrati ho jedenkrat, chronologicky.
+// Every game is in both teams' schedules - return it once, chronologically.
 function uniqueGames(teams) {
   const seen = new Set();
   const games = [];
@@ -31,12 +31,12 @@ function uniqueGames(teams) {
   );
 }
 
-// Kluc pre statistiky konkretneho timu v konkretnom zapase.
+// Key for one team's stats in one specific game.
 function gameKey(teamId, gameId) {
   return teamId + ":" + gameId;
 }
 
-function computeStandings(schedules) {
+function computeStandings(schedules, lastSeason) {
   const teams = Object.entries(schedules.teams);
 
   const winsById = {};
@@ -50,8 +50,8 @@ function computeStandings(schedules) {
     keyById[team.id] = key;
   }
 
-  // Zapasy podla datumu. Value: vitaz dostane (aktualne vyhry supera + 1),
-  // porazeny 0. ELO: K = 40, ocakavany vysledok podla ratingu supera.
+  // Games by date. Value: the winner gets (opponent's current wins + 1), the
+  // loser 0. ELO: K = 40, expected result from the opponent's rating.
   const gameStats = {};
   for (const g of uniqueGames(teams)) {
     const w = g.winnerId;
@@ -84,7 +84,7 @@ function computeStandings(schedules) {
       pointsAgainst += g.opponentScore;
     }
 
-    // Streak: kladne = vyhry v rade, zaporne = prehry v rade.
+    // Streak: positive = consecutive wins, negative = consecutive losses.
     let streak = 0;
     if (gp > 0) {
       const last = played[gp - 1].result;
@@ -93,15 +93,26 @@ function computeStandings(schedules) {
       streak = last === "W" ? n : -n;
     }
 
-    // Uspesnost doma / vonku.
+    // Home / away win percentage.
     const homeGames = played.filter((g) => g.homeAway === "home");
     const roadGames = played.filter((g) => g.homeAway === "away");
     const homeWins = homeGames.filter((g) => g.result === "W").length;
     const roadWins = roadGames.filter((g) => g.result === "W").length;
 
-    // Poslednych 10 odohranych zapasov: pocet vyhier (a pocet zapasov).
+    // Last 10 played games: number of wins (and number of games).
     const last10Games = played.slice(-10);
     const last10Wins = last10Games.filter((g) => g.result === "W").length;
+
+    // Prediction: current wins + unplayed games the ESPN Matchup Predictor
+    // gives this team more than 50 % (exactly 50 % does not count as a win).
+    const predictedWins = team.games.filter(
+      (g) => !g.completed && g.predictor && g.predictor[g.homeAway] > 50
+    ).length;
+
+    // Win percentage change vs. last season, in percentage points.
+    const lastRecord = lastSeason && lastSeason.records[team.name];
+    const lastPct = lastRecord ? lastRecord[0] / (lastRecord[0] + lastRecord[1]) : null;
+    const pct = gp ? wins / gp : 0;
 
     const ppg = gp ? pointsFor / gp : 0;
     const oppg = gp ? pointsAgainst / gp : 0;
@@ -111,7 +122,7 @@ function computeStandings(schedules) {
       team: team.name,
       wins,
       losses: gp - wins,
-      pct: gp ? wins / gp : 0,
+      pct,
       ppg,
       oppg,
       diff: ppg - oppg,
@@ -124,13 +135,17 @@ function computeStandings(schedules) {
       last10: last10Wins,
       last10Games: last10Games.length,
       streak,
+      predictedWins,
+      prediction: wins + predictedWins,
+      pctChange: lastPct === null ? 0 : (pct - lastPct) * 100,
+      hasLastSeason: lastPct !== null,
     };
   });
 
   return { rows, winsById, keyById, gameStats };
 }
 
-// Zoradenie: vybrany stlpec, potom % uspesnosti, potom diff, potom nazov.
+// Sorting: selected column, then win percentage, then diff, then name.
 function sortRows(rows, key, dir) {
   const sign = dir === "asc" ? 1 : -1;
   const cmp = (a, b, k) =>

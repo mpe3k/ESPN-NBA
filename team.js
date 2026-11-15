@@ -1,4 +1,4 @@
-// Detail timu: odohrane aj nadchadzajuce zapasy. Vyzaduje schedules.js a stats.js.
+// Team detail: played and upcoming games. Requires schedules.js and stats.js.
 
 const params = new URLSearchParams(location.search);
 const key = params.get("team");
@@ -6,7 +6,7 @@ const team = key && Object.prototype.hasOwnProperty.call(nbaSchedules.teams, key
   ? nbaSchedules.teams[key]
   : null;
 
-const dateFmt = new Intl.DateTimeFormat("sk-SK", {
+const dateFmt = new Intl.DateTimeFormat("en-US", {
   weekday: "short",
   day: "numeric",
   month: "numeric",
@@ -22,8 +22,8 @@ function cell(tr, text, className) {
   return td;
 }
 
-// Farba podla sance na vyhru: nad 50 % zelena, pod 50 % cervena; cim je
-// pravdepodobnost vzdialenejsia od 50 %, tym sytejsi odtien.
+// Color by win chance: 50 % and above green, below 50 % red; the further the
+// probability is from 50 %, the stronger the shade.
 function predictionColor(pct) {
   const strength = Math.min(Math.abs(pct - 50) / 50, 1);
   const alpha = (0.08 + 0.62 * strength).toFixed(2);
@@ -48,7 +48,7 @@ function gamesTable(games, columns, rowFn) {
 function render() {
   const root = document.getElementById("team");
   if (!team) {
-    root.textContent = "Tím sa nenašiel.";
+    root.textContent = "Team not found.";
     return;
   }
 
@@ -78,15 +78,15 @@ function render() {
     }
   };
 
-  // Jedna tabulka: odohrane aj nadchadzajuce zapasy podla datumu.
+  // One table: played and upcoming games ordered by date.
   const gamesTableEl = gamesTable(
     sorted,
     [
-      { label: "Dátum" },
-      { label: "Súper" },
-      { label: "Výsledok" },
-      { label: "Skóre", num: true },
-      { label: "Value", num: true },
+      { label: "DATE" },
+      { label: "OPPONENT" },
+      { label: "RESULT" },
+      { label: "SCORE", num: true },
+      { label: "VALUE", num: true },
       { label: "ELO", num: true },
     ],
     (tr, g) => {
@@ -95,8 +95,8 @@ function render() {
       const gs = g.completed ? gameStats[gameKey(team.id, g.gameId)] : null;
       if (!gs) {
         cell(tr, "");
-        // Neodohrany zapas: v stlpci Skore je sanca timu na vyhru podla
-        // ESPN Matchup Predictor, podfarbena zelenou (vyhra) / cervenou (prehra).
+        // Unplayed game: the SCORE column shows the team's win chance from the
+        // ESPN Matchup Predictor, shaded green (win) / red (loss).
         const p = g.predictor;
         const score = cell(tr, p ? `${p[g.homeAway].toFixed(1)} %` : "", "num");
         if (p) score.style.backgroundColor = predictionColor(p[g.homeAway]);

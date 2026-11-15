@@ -1,50 +1,64 @@
-// Vykreslenie sortovatelnej NBA tabulky. Vyzaduje schedules.js a stats.js.
+// Sortable NBA standings table. Requires schedules.js, lastSeason.js and stats.js.
 
 const COLUMNS = [
-  { key: "team", label: "Tím", numeric: false },
-  { key: "wins", label: "V", numeric: true, format: (r) => String(r.wins) },
-  { key: "losses", label: "P", numeric: true, format: (r) => String(r.losses) },
-  { key: "pct", label: "Úspešnosť", numeric: true, format: (r) => (r.pct * 100).toFixed(1) + " %" },
-  { key: "ppg", label: "Body / zápas", numeric: true, format: (r) => r.ppg.toFixed(1) },
-  { key: "oppg", label: "Obdržané / zápas", numeric: true, format: (r) => r.oppg.toFixed(1) },
+  { key: "team", label: "TEAM", numeric: false },
+  { key: "wins", label: "W", numeric: true, format: (r) => String(r.wins) },
+  { key: "losses", label: "L", numeric: true, format: (r) => String(r.losses) },
+  { key: "pct", label: "PCT", numeric: true, format: (r) => (r.pct * 100).toFixed(1) + " %" },
+  {
+    key: "homePct",
+    label: "HOME",
+    numeric: true,
+    format: (r) => (r.homeGames ? Math.round(r.homePct * 100) + " %" : "–"),
+  },
+  {
+    key: "roadPct",
+    label: "AWAY",
+    numeric: true,
+    format: (r) => (r.roadGames ? Math.round(r.roadPct * 100) + " %" : "–"),
+  },
+  { key: "ppg", label: "PPG", numeric: true, format: (r) => r.ppg.toFixed(1) },
+  { key: "oppg", label: "OPP PPG", numeric: true, format: (r) => r.oppg.toFixed(1) },
   {
     key: "diff",
-    label: "Diff",
+    label: "DIFF",
     numeric: true,
     format: (r) => (r.diff > 0 ? "+" : "") + r.diff.toFixed(1),
     tone: (r) => r.diff,
   },
-  { key: "value", label: "Value", numeric: true, format: (r) => String(r.value) },
-  { key: "elo", label: "ELO", numeric: true, format: (r) => r.elo.toFixed(0) },
-  {
-    key: "homePct",
-    label: "Home",
-    numeric: true,
-    format: (r) => (r.homeGames ? (r.homePct * 100).toFixed(1) + " %" : "–"),
-  },
-  {
-    key: "roadPct",
-    label: "Road",
-    numeric: true,
-    format: (r) => (r.roadGames ? (r.roadPct * 100).toFixed(1) + " %" : "–"),
-  },
-  {
-    key: "last10",
-    label: "Posl. 10",
-    numeric: true,
-    format: (r) => `${r.last10}-${r.last10Games - r.last10}`,
-  },
   {
     key: "streak",
-    label: "Séria",
+    label: "STRK",
     numeric: true,
     format: (r) => (r.streak === 0 ? "–" : (r.streak > 0 ? "W" : "L") + Math.abs(r.streak)),
     tone: (r) => r.streak,
   },
+  {
+    key: "last10",
+    label: "L10",
+    numeric: true,
+    format: (r) => `${r.last10}-${r.last10Games - r.last10}`,
+  },
+  { key: "value", label: "VALUE", numeric: true, format: (r) => String(r.value) },
+  { key: "elo", label: "ELO", numeric: true, format: (r) => r.elo.toFixed(0) },
+  // Current wins + unplayed games the ESPN Matchup Predictor gives the team over 50 %.
+  { key: "prediction", label: "PREDICTION", numeric: true, format: (r) => String(r.prediction) },
+  // Win percentage change vs. last season, in whole percentage points.
+  {
+    key: "pctChange",
+    label: "2026",
+    numeric: true,
+    format: (r) => {
+      if (!r.hasLastSeason) return "–";
+      const n = Math.round(r.pctChange);
+      return (n > 0 ? "+" : "") + n + " %";
+    },
+    tone: (r) => Math.round(r.pctChange),
+  },
 ];
 
 function renderStandings(schedules, root) {
-  const { rows } = computeStandings(schedules);
+  const { rows } = computeStandings(schedules, nbaLastSeason);
   const state = { key: "pct", dir: "desc" };
 
   const table = document.createElement("table");
@@ -115,4 +129,4 @@ function renderStandings(schedules, root) {
 
 renderStandings(nbaSchedules, document.getElementById("standings"));
 document.getElementById("info").textContent =
-  `Sezóna ${nbaSchedules.season} · dáta z ${nbaSchedules.fetchedAt} · zdroj ${nbaSchedules.source}`;
+  `Season ${nbaSchedules.season} · data from ${nbaSchedules.fetchedAt} · source ${nbaSchedules.source}`;
